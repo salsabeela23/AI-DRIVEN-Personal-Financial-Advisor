@@ -1,0 +1,2433 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root {
+  --base-clr:rgba(255, 255, 255, 0.84);             /* Soft off-white background like Flipkart */
+  --line-clr: #172337;             /* Deep navy for strong UI elements */
+  --hover-clr: #E0ECFF;            /* Light blue tint for hover interactions */
+  --text-clr: #212121;             /* Flipkart uses near-black for readability */
+  --accent-clr: #2874F0;           /* Flipkart blue – primary action color */
+  --secondary-text-clr:rgb(255, 255, 255);   /* Medium grey – for subtitles and notes */
+  --success-clr: #2E7D32;          /* Muted green for confirmations (Flipkart-style) */
+  --warning-clr: #FFB020;          /* Warm amber-yellow – friendly alerts */
+  --card-bg: #FFFFFF;              /* Content containers / cards */
+  --border-clr:rgb(255, 255, 255);           /* Soft grey borders */
+}
+
+
+
+        #sidebar {
+            box-sizing: border-box;
+            height: 100vh;
+            width: 250px;
+            padding: 5px 1em;
+            background-color: var(--base-clr);
+
+
+            position: sticky;
+            top: 0;
+            align-self: start;
+            transition: 300ms ease-in-out;
+            overflow: hidden;
+            text-wrap: nowrap;
+        }
+
+        #sidebar.close {
+            padding: 5px;
+            width: 60px;
+        }
+
+        #sidebar ul {
+            list-style: none;
+        }
+
+        #sidebar>ul>li:first-child {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 16px;
+
+            .logo {
+                font-weight: 600;
+            }
+        }
+
+        #sidebar ul li.active a {
+            color: var(--accent-clr);
+
+            svg {
+                fill: var(--accent-clr);
+            }
+        }
+
+        #sidebar a,
+        #sidebar .dropdown-btn,
+        #sidebar .logo {
+            border-radius: .5em;
+            padding: .85em;
+            text-decoration: none;
+            color: var(--text-clr);
+            display: flex;
+            align-items: center;
+            gap: 1em;
+            cursor: pointer;
+        }
+
+        .dropdown-btn {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        #sidebar svg {
+            flex-shrink: 0;
+            fill: var(--text-clr);
+        }
+
+        #sidebar a span,
+        #sidebar .dropdown-btn span {
+            flex-grow: 1;
+        }
+
+        #sidebar a:hover,
+        #sidebar .dropdown-btn:hover {
+            background-color: var(--hover-clr);
+        }
+
+        #sidebar .sub-menu {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: 300ms ease-in-out;
+
+            >div {
+                overflow: hidden;
+            }
+        }
+
+        #sidebar .sub-menu.show {
+            grid-template-rows: 1fr;
+        }
+
+        .dropdown-btn svg {
+            transition: 200ms ease;
+        }
+
+        .rotate svg:last-child {
+            rotate: 180deg;
+        }
+
+        #sidebar .sub-menu a {
+            padding-left: 2em;
+        }
+
+        #toggle-btn {
+            margin-left: auto;
+            padding: 1em;
+            border: none;
+            border-radius: .5em;
+            background: none;
+            cursor: pointer;
+
+            svg {
+                transition: rotate 150ms ease;
+            }
+        }
+
+        #toggle-btn:hover {
+            background-color: var(--hover-clr);
+        }
+
+
+        @media(max-width: 800px) {
+            body {
+                grid-template-columns: 1fr;
+            }
+
+            main {
+                padding: 2em 1em 60px 1em;
+            }
+
+            .container {
+                border: none;
+                padding: 0;
+            }
+
+            #sidebar {
+                height: 60px;
+                width: 100%;
+                border-right: none;
+                border-top: 1px solid var(--line-clr);
+                padding: 0;
+                position: fixed;
+                top: unset;
+                bottom: 0;
+
+                >ul {
+                    padding: 0;
+                    display: grid;
+                    grid-auto-columns: 60px;
+                    grid-auto-flow: column;
+                    align-items: center;
+                    overflow-x: scroll;
+                }
+
+                ul li {
+                    height: 100%;
+                }
+
+                ul a,
+                ul .dropdown-btn {
+                    width: 60px;
+                    height: 60px;
+                    padding: 0;
+                    border-radius: 0;
+                    justify-content: center;
+                }
+
+                ul li span,
+                ul li:first-child,
+                .dropdown-btn svg:last-child {
+                    display: none;
+                }
+
+                ul li .sub-menu.show {
+                    position: fixed;
+                    bottom: 60px;
+                    left: 0;
+                    box-sizing: border-box;
+                    height: 60px;
+                    width: 100%;
+                    background-color: var(--hover-clr);
+                    border-top: 1px solid var(--line-clr);
+                    display: flex;
+                    justify-content: center;
+
+                    >div {
+                        overflow-x: auto;
+                    }
+
+                    li {
+                        display: inline-flex;
+                    }
+
+                    a {
+                        box-sizing: border-box;
+                        padding: 1em;
+                        width: auto;
+                        justify-content: center;
+                    }
+                }
+            }
+        }
+    </style>
+
+    <nav id="sidebar">
+        <ul>
+            <li>
+                <span class="logo">Financial Advisor</span>
+                <button onclick=toggleSidebar() id="toggle-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#e8eaed">
+                        <path
+                            d="m313-480 155 156q11 11 11.5 27.5T468-268q-11 11-28 11t-28-11L228-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l184-184q11-11 27.5-11.5T468-692q11 11 11 28t-11 28L313-480Zm264 0 155 156q11 11 11.5 27.5T732-268q-11 11-28 11t-28-11L492-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l184-184q11-11 27.5-11.5T732-692q11 11 11 28t-11 28L577-480Z" />
+                    </svg>
+                </button>
+            </li>
+            <li class="active">
+                <a data-target="dashboard" class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#e8eaed">
+                        <path
+                            d="M520-640v-160q0-17 11.5-28.5T560-840h240q17 0 28.5 11.5T840-800v160q0 17-11.5 28.5T800-600H560q-17 0-28.5-11.5T520-640ZM120-480v-320q0-17 11.5-28.5T160-840h240q17 0 28.5 11.5T440-800v320q0 17-11.5 28.5T400-440H160q-17 0-28.5-11.5T120-480Zm400 320v-320q0-17 11.5-28.5T560-520h240q17 0 28.5 11.5T840-480v320q0 17-11.5 28.5T800-120H560q-17 0-28.5-11.5T520-160Zm-400 0v-160q0-17 11.5-28.5T160-360h240q17 0 28.5 11.5T440-320v160q0 17-11.5 28.5T400-120H160q-17 0-28.5-11.5T120-160Zm80-360h160v-240H200v240Zm400 320h160v-240H600v240Zm0-480h160v-80H600v80ZM200-200h160v-80H200v80Zm160-320Zm240-160Zm0 240ZM360-280Z" />
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <li>
+                <button onclick=toggleSubMenu(this) class="dropdown-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#e8eaed">
+                        <path
+                            d="m221-313 142-142q12-12 28-11.5t28 12.5q11 12 11 28t-11 28L250-228q-12 12-28 12t-28-12l-86-86q-11-11-11-28t11-28q11-11 28-11t28 11l57 57Zm0-320 142-142q12-12 28-11.5t28 12.5q11 12 11 28t-11 28L250-548q-12 12-28 12t-28-12l-86-86q-11-11-11-28t11-28q11-11 28-11t28 11l57 57Zm339 353q-17 0-28.5-11.5T520-320q0-17 11.5-28.5T560-360h280q17 0 28.5 11.5T880-320q0 17-11.5 28.5T840-280H560Zm0-320q-17 0-28.5-11.5T520-640q0-17 11.5-28.5T560-680h280q17 0 28.5 11.5T880-640q0 17-11.5 28.5T840-600H560Z" />
+                    </svg>
+                    <span>Tracker</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#e8eaed">
+                        <path
+                            d="M480-361q-8 0-15-2.5t-13-8.5L268-556q-11-11-11-28t11-28q11-11 28-11t28 11l156 156 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L508-372q-6 6-13 8.5t-15 2.5Z" />
+                    </svg>
+                </button>
+                <ul class="sub-menu">
+                    <div>
+                        <li><a data-target="tracker" class="menu-item">Income</a></li>
+                        <li><a data-target="expense-manager" class="menu-item">Expense</a></li>
+                    </div>
+                </ul>
+            </li>
+
+            <li>
+                <button onclick=toggleSubMenu(this) class="dropdown-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
+                        fill="#e8eaed">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8 19H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V9h2v2zm4 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V9h2v2zm4 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V9h2v2zm0-4H6V5h12v2z" />
+                    </svg>
+
+
+                    <span>Calculator</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#e8eaed">
+                        <path
+                            d="M480-361q-8 0-15-2.5t-13-8.5L268-556q-11-11-11-28t11-28q11-11 28-11t28 11l156 156 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L508-372q-6 6-13 8.5t-15 2.5Z" />
+                    </svg>
+                </button>
+                <ul class="sub-menu">
+                    <div>
+                        <li><a data-target="calculator" class="menu-item">GST</a></li>
+                    </div>
+                </ul>
+            </li>
+
+            <li>
+                <a data-target="advisor" class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#e8eaed">
+                        <path
+                            d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-240v-32q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v32q0 33-23.5 56.5T720-160H240q-33 0-56.5-23.5T160-240Zm80 0h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Zm0 400Z" />
+                    </svg>
+                    <span>Investment Advisor</span>
+                </a>
+            </li>
+
+            <li>
+                <a data-target="logout" class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" width="24px" viewBox="0 0 24 24"
+                        fill="#e8eaed">
+                        <path
+                            d="M10.09 15.59L12.67 18.17 18 12.84 12.67 7.51 10.09 10.09 12.67 12.67 10.09 15.59M4 19V5H11V3H4C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H11V19H4Z" />
+                    </svg>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', function () {
+                    // Remove 'active' class from all menu items
+                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Hide all content sections
+                    document.querySelectorAll('.content-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+
+                    // Show the selected content section
+                    const target = this.getAttribute('data-target');
+                    document.getElementById(target).classList.add('active');
+                });
+            });
+        });
+
+
+        const toggleButton = document.getElementById('toggle-btn')
+        const sidebar = document.getElementById('sidebar')
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('close')
+            toggleButton.classList.toggle('rotate')
+
+            closeAllSubMenus()
+        }
+
+        function toggleSubMenu(button) {
+
+            if (!button.nextElementSibling.classList.contains('show')) {
+                closeAllSubMenus()
+            }
+
+            button.nextElementSibling.classList.toggle('show')
+            button.classList.toggle('rotate')
+
+            if (sidebar.classList.contains('close')) {
+                sidebar.classList.toggle('close')
+                toggleButton.classList.toggle('rotate')
+            }
+        }
+
+        function closeAllSubMenus() {
+            Array.from(sidebar.getElementsByClassName('show')).forEach(ul => {
+                ul.classList.remove('show')
+                ul.previousElementSibling.classList.remove('rotate')
+            })
+        }
+    </script>
+
+
+    <!-- Scrollable Content Section -->
+    <div class="content">
+
+
+        <div id="dashboard" class="content-section active">
+            <div class="main-header">
+                <h1>Welcome, {{ display_name }}</h1>
+                <h4>Your personalized financial advisor dashboard overview</h4>
+            </div>
+
+
+            <!-- Horizontal Scroll List Section -->
+            <div class="scroll-container">
+                <button class="scroll-arrow left-arrow">←</button>
+
+                <div class="cards-wrapper">
+                    <div class="card">
+                        <h4>Total Savings</h4>
+                        <p>₹{{ total_amount }}</p>
+                        <p class="percentage-change increase">+12%</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>Total Expenses</h4>
+                        <p>₹{{ total_expenses }}</p>
+                        <p class="percentage-change increase">+12%</p>
+                    </div>
+                    <div class="card">
+                        <h4>Current Savings</h4>
+                        <p>₹{{ total_amount_after_expense }}</p>
+                        <p class="percentage-change decrease">-5%</p>
+                    </div>
+                </div>
+
+                <button class="scroll-arrow right-arrow">→</button>
+            </div>
+
+
+            <!-- Chart Containers -->
+            {% if total_amount != 0 %}
+
+            <div class="chart-container-row">
+                <div class="chart-container">
+                    <canvas id="incomeChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="expensesChart"></canvas>
+                </div>
+            </div>
+
+
+
+            <div class="chart-container-row">
+                <div class="chart-container-small">
+                    <h2>Income vs Expenses Overview</h2>
+                    <canvas id="overviewChart"></canvas>
+                </div>
+                {% if total_expenses != 0 %}
+
+                <div class="chart-container-small">
+                    <h2>Expense Breakdown</h2>
+                    <canvas id="expenseTypeChart"></canvas>
+                </div>
+                {% endif %}
+
+                <div class="chart-container-small">
+                    <h2>Expenses by Date</h2>
+                    <canvas id="expenseDateChart"></canvas>
+                </div>
+            </div>
+            {% endif %}
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+            <style>
+                /* Cream theme styles */
+                body {
+                    background-color: #f5f3f0;
+                    /* Light cream background */
+                    color: #4a4a4a;
+                    /* Dark text color for contrast */
+                    font-family: 'Arial', sans-serif;
+                }
+
+                .main-header h1 {
+                    color: #6a4e23;
+                    /* Darker cream for the heading */
+                }
+
+                .main-header h4 {
+                    color: #9e7c49;
+                    /* Slightly lighter cream for the subheading */
+                }
+
+
+                .total-amount-view {
+                    background: linear-gradient(135deg, #f0e68c, #fff3b0);
+                    /* Light cream gradient */
+                    color: #3e2723;
+                    /* Dark brown text */
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    text-align: center;
+                    padding: 30px 40px;
+                    border-radius: 15px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                    margin: 20px auto;
+                    max-width: 500px;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    border: 2px solid #fff;
+                }
+
+                .total-amount-view:hover {
+                    transform: translateY(-10px);
+                    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+                }
+
+                .chart-container-row {
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 15px;
+                    flex-wrap: wrap;
+                    padding: 10px;
+                }
+
+                .chart-container {
+                    flex: 1 1 calc(50% - 7.5px);
+                    max-width: calc(50% - 7.5px);
+                    min-width: 280px;
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 4px;
+                    border-radius: 12px;
+                    border: 1px solid rgba(106, 78, 35, 0.6);
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    margin: 10px 0;
+                }
+
+                .chart-container canvas {
+                    width: 100% !important;
+                    height: 100% !important;
+                    max-width: 100%;
+                    max-height: 100%;
+                    border-radius: 12px;
+                }
+
+
+                .chart-container h2 {
+                    font-size: 1.5rem;
+                    color: #6a4e23;
+                    margin-bottom: 20px;
+                }
+
+                .chart-container h3 {
+                    font-size: 16px;
+                    color: #6a4e23;
+                    align-items: center;
+                    margin-bottom: 8px;
+                }
+
+
+                .chart-container-small {
+                    background: #fff;
+                    border-radius: 12px;
+                    text-align: center;
+                    flex: 1 1 calc(33.33% - 18px);
+                    min-width: 250px;
+                    transition: all 0.3s ease-in-out;
+                    background: rgba(255, 255, 255, 0.1);
+                    margin: 20px auto;
+                    padding: 25px;
+                    border-radius: 12px;
+                    border: 1px solid rgba(106, 78, 35, 0.6);
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                }
+
+                /* Stylish titles */
+                .chart-container-small h2 {
+                    font-size: 1rem;
+                    color: #333;
+                    font-weight: 600;
+                    margin-bottom: 10px;
+                }
+
+                canvas {
+                    display: block;
+                    width: auto;
+                    height: auto;
+                }
+
+                .scroll-container {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    overflow: hidden;
+                }
+
+                .cards-wrapper {
+                    display: flex;
+                    overflow-x: auto;
+                    scroll-behavior: smooth;
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+
+                .cards-wrapper::-webkit-scrollbar {
+                    display: none;
+                }
+
+                .card {
+                    flex: 0 0 auto;
+                    margin-right: 15px;
+                    width: 250px;
+                    padding: 12px;
+                    background-color: #f4f4f4;
+                    border-radius: 10px;
+                    text-align: center;
+                }
+
+                .scroll-arrow {
+                    background-color: rgba(0, 0, 0, 0.5);
+                    color: white;
+                    border: none;
+                    padding: 10px;
+                    cursor: pointer;
+                    z-index: 10;
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                }
+
+                .scroll-container:hover .scroll-arrow {
+                    opacity: 1;
+                }
+
+                .left-arrow {
+                    left: 10px;
+                }
+
+                .right-arrow {
+                    right: 10px;
+                }
+
+                .scroll-arrow:hover {
+                    background-color: rgba(0, 0, 0, 0.7);
+                }
+            </style>
+
+            <script>
+                // Income data passed from Django
+                const incomeData = {{ incomes| safe }};
+                const expenseData = {{ expenses| safe }};
+
+                const incomeLabels = incomeData.map(item => item.date);
+                const incomeAmounts = incomeData.map(item => parseFloat(item.amount));
+
+                const expenseLabels = expenseData.map(item => item.date);
+                const expenseAmounts = expenseData.map(item => parseFloat(item.amount));
+
+                const incomeCtx = document.getElementById('incomeChart').getContext('2d');
+                const incomeChart = new Chart(incomeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: incomeLabels,
+                        datasets: [{
+                            label: 'Income in ₹',
+                            data: incomeAmounts,
+                            backgroundColor: 'rgba(213, 173, 98, 0.6)', /* Soft golden for income */
+                            borderColor: 'rgba(213, 173, 98, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Income Trend'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount (₹)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                const expensesCtx = document.getElementById('expensesChart').getContext('2d');
+                const expensesChart = new Chart(expensesCtx, {
+                    type: 'line',
+                    data: {
+                        labels: expenseLabels,
+                        datasets: [{
+                            label: 'Expenses in ₹',
+                            data: expenseAmounts,
+                            backgroundColor: 'rgba(255, 129, 89, 0.6)', /* Warm cream for expenses */
+                            borderColor: 'rgba(255, 129, 89, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Expenses Trend'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount (₹)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                const overviewCtx = document.getElementById('overviewChart').getContext('2d');
+                const overviewChart = new Chart(overviewCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Income', 'Expenses'],
+                        datasets: [{
+                            label: 'Income vs Expenses',
+                            data: [incomeAmounts.reduce((a, b) => a + b, 0), expenseAmounts.reduce((a, b) => a + b, 0)],
+                            backgroundColor: ['#0B9C51', '#940909'],
+                            borderColor: ['#8bc34a', '#ff7043'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Income vs Expenses Overview'
+                            }
+                        }
+                    }
+                });
+
+                const expenseCategoryData = expenseData.reduce((acc, item) => {
+                    const type = item.type || "others";
+                    acc[type] = (acc[type] || 0) + parseFloat(item.amount);
+                    return acc;
+                }, {});
+
+                const expenseCategoryLabels = Object.keys(expenseCategoryData);
+                const expenseCategoryAmounts = Object.values(expenseCategoryData);
+
+                const expenseTypeCtx = document.getElementById('expenseTypeChart').getContext('2d');
+                const expenseTypeChart = new Chart(expenseTypeCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: expenseCategoryLabels,
+                        datasets: [{
+                            label: 'Expenses Breakdown',
+                            data: expenseCategoryAmounts,
+                            backgroundColor: ['#e57373', '#fbc02d', '#81c784', '#64b5f6'],
+                            borderColor: ['#e57373', '#fbc02d', '#81c784', '#64b5f6'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Expense Breakdown by Category'
+                            }
+                        }
+                    }
+                });
+
+                const expenseDateData = expenseData.reduce((acc, item) => {
+                    const date = item.date || "Unknown";
+                    acc[date] = (acc[date] || 0) + parseFloat(item.amount);
+                    return acc;
+                }, {});
+
+                const expenseDateLabels = Object.keys(expenseDateData);
+                const expenseDateAmounts = Object.values(expenseDateData);
+
+                const expenseDateCtx = document.getElementById('expenseDateChart').getContext('2d');
+                const expenseDateChart = new Chart(expenseDateCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: expenseDateLabels,
+                        datasets: [{
+                            label: 'Expenses by Date',
+                            data: expenseDateAmounts,
+                            backgroundColor: ['#ffb74d', '#81c784', '#64b5f6', '#e57373', '#ba68c8', '#f06292'],
+                            borderColor: ['#ffb74d', '#81c784', '#64b5f6', '#e57373', '#ba68c8', '#f06292'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Expense Breakdown by Date'
+                            }
+                        }
+                    }
+                });
+
+                document.querySelector('.left-arrow').addEventListener('click', function () {
+                    document.querySelector('.cards-wrapper').scrollBy({
+                        left: -250, // Adjust this value based on your card width
+                        behavior: 'smooth'
+                    });
+                });
+
+                document.querySelector('.right-arrow').addEventListener('click', function () {
+                    document.querySelector('.cards-wrapper').scrollBy({
+                        left: 250, // Adjust this value based on your card width
+                        behavior: 'smooth'
+                    });
+                });
+
+            </script>
+        </div>
+
+
+        <div id="tracker" class="content-section">
+            <div class="main-header">
+                <h1>Income Tracker</h1>
+                <h4>Track your earnings and expenses here.</h4>
+            </div>
+            {% load static %}
+            <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+            <!-- Flexbox container -->
+            <div class="income-container">
+                <!-- Income Form Section -->
+                <div class="income-card">
+                    <h4>Add Your Income</h4>
+                    <form id="incomeForm" method="POST" action="{% url 'add_income' %}">
+                        <div class="input-group">
+                            <label for="amount">Amount</label>
+                            <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="incomeType">Type of Income</label>
+                            <select id="incomeType" name="type" required>
+                                <option value="">Select Income Type</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Card">Card</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="taxStatus">Is it Taxable?</label>
+                            <select id="taxStatus" name="tax" required>
+                                <option value="">Select Tax Status</option>
+                                <option value="Taxable">Taxable</option>
+                                <option value="After Tax">After Tax</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+                        <button type="submit" class="submit-btn">Add Income</button>
+                    </form>
+                    <p id="responseMessage"></p>
+                </div>
+
+                <!-- Added Incomes Section -->
+                <div class="income-list-card">
+                    <h4>Added Incomes</h4>
+                    <table class="income-table">
+                        <thead>
+                            <tr>
+                                <th>Amount (₹)</th>
+                                <th>Type</th>
+                                <th>Tax Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for income in incomes %}
+                            <tr>
+                                <td>{{ income.amount }}</td>
+                                <td>{{ income.type }}</td>
+                                <td>{{ income.taxable }}</td>
+                                <td>{{ income.date }}</td>
+                                <td>
+                                    <form method="POST" action="{% url 'delete_income' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="income_id" value="{{ income.id }}">
+                                        <button type="submit" class="delete-btn" title="Delete">
+                                            <span class="material-icons">delete</span>
+                                        </button>
+                                    </form>
+
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5">No incomes added yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <style>
+                .income-container {
+                    display: flex;
+                    gap: 20px;
+                    /* Space between the form and the list */
+                    flex-wrap: wrap;
+                    /* Wrap content on smaller screens */
+                }
+
+                .income-card,
+                .income-list-card {
+                    flex: 1;
+                    min-width: 300px;
+                    background-color: #f9f9f9;
+                    padding: 20px;
+                    border-radius: 8px;
+                    text-align: center;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                }
+
+
+                .input-group {
+                    margin-bottom: 20px;
+                    text-align: left;
+                }
+
+                .input-group label {
+                    font-size: 1rem;
+                    color: #333;
+                }
+
+                .input-group input,
+                .input-group select {
+                    width: 100%;
+                    padding: 10px;
+                    margin-top: 5px;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                    font-size: 1rem;
+                }
+
+                .submit-btn {
+                    background-color:rgb(0, 140, 255);
+                    color: white;
+                    padding: 12px 20px;
+                    border: none;
+                    border-radius: 5px;
+                    margin-bottom: 16px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    width: 100%;
+                }
+
+                .alert-btn {
+                    background-color:rgb(255, 21, 21);
+                    color: white;
+                    padding: 12px 20px;
+                    border: none;
+                    margin-top: 16px;
+                    border-radius: 5px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    width: 100%;
+                }
+
+                .submit-btn:hover {
+                    background-color: rgb(31, 116, 186);
+                }
+
+                /* General Table Styling */
+                .income-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                    border: 1px solid #ddd;
+                }
+
+                .income-table th,
+                .income-table td {
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                    text-align: left;
+                }
+
+                .income-table th {
+                    background-color: #f4f4f4;
+                    font-weight: bold;
+                }
+
+                .income-table tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+
+                .income-table tr:hover {
+                    background-color: #f1f1f1;
+                }
+
+                /* Delete Icon Styling */
+                .delete-btn {
+                    background: black;
+                    border: none;
+                    width: auto;
+                    display: flex;
+                    /* Use Flexbox for alignment */
+                    align-items: center;
+                    /* Vertically center the icon */
+                    justify-content: center;
+                    /* Horizontally center the icon */
+                    cursor: pointer;
+                    padding: 8px;
+                    /* Optional: Add padding for a better click area */
+                    border-radius: 4px;
+                    /* Optional: Add rounded corners */
+                    color: white;
+                    /* Optional: Text or icon color */
+                }
+
+                .delete-btn:hover {
+                    background: #870e05
+                }
+
+                .delete-icon {
+                    width: 20px;
+                    height: 20px;
+
+                    filter: grayscale(100%);
+                    transition: filter 0.3s ease;
+                }
+
+                .delete-icon:hover {
+                    filter: red;
+                }
+            </style>
+        </div>
+
+
+        <div id="expense-manager" class="content-section">
+            <div class="main-header">
+                <h1>Expense Manager</h1>
+                <h4>Track your expenses and manage savings here.</h4>
+            </div>
+            {% load static %}
+            <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+            <div class="income-container">
+                <div class="income-card">
+                    <h4>Add Your Expense</h4>
+                    <form id="expenseForm" method="POST" action="{% url 'add_expense' %}">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <label for="expenseAmount">Amount</label>
+                            <input type="number" id="expenseAmount" name="amount" placeholder="Enter amount" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="expenseType">Type of Expense</label>
+                            <select id="expenseType" name="type" required>
+                                <option value="">Select Expense Type</option>
+                                <option value="Food">Food</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="expenseComment">Comment</label>
+                            <input type="text" id="expenseComment" name="comment" placeholder="What was it used for?">
+                        </div>
+                        <div class="input-group">
+                            <label for="expenseDate">Date</label>
+                            <input type="date" id="expenseDate" name="date" required>
+                        </div>
+                        <button type="submit" class="submit-btn">Add Expense</button>
+                    </form>
+
+                    <hr class="custom-divider">
+
+                    <button id="sendAlertButton" class="alert-btn" data_username="{{ display_name }}"
+                        data_email="{{ email }}">
+                        Send Alert Email
+                    </button>
+                    <p id="statusMessage" style="margin-top: 10px; font-weight: bold;"></p>
+
+                    <p id="responseMessage1"></p>
+                </div>
+
+                <div class="income-list-card">
+                    <h4>Added Expenses</h4>
+                    <table class="income-table">
+                        <thead>
+                            <tr>
+                                <th>Amount (₹)</th>
+                                <th>Type</th>
+                                <th>Comment</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expense in expenses %}
+                            <tr>
+                                <td>{{ expense.amount }}</td>
+                                <td>{{ expense.type }}</td>
+                                <td>{{ expense.comment }}</td>
+                                <td>{{ expense.date }}</td>
+                                <td>
+                                    <form method="POST" action="{% url 'delete_expense' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="expense_id" value="{{ expense.id }}">
+                                        <button type="submit" class="delete-btn" title="Delete">
+                                            <span class="material-icons">delete</span>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5">No expenses added yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <script>
+                document.getElementById("expenseForm").addEventListener("submit", async function (e) {
+                    e.preventDefault(); // Prevent the form from submitting traditionally
+
+                    const form = e.target;
+                    const formData = new FormData(form); // Gather form data
+                    const url = form.action;
+
+                    try {
+                        const response = await fetch(url, {
+                            method: "POST",
+                            body: formData,
+                            headers: {
+                                "X-CSRFToken": "{{ csrf_token }}", // Required for Django CSRF protection
+                            },
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            if (result.success) {
+                                alert(result.message);
+                                console.log("Data:", result.data); // Log the returned data
+                            } else {
+                                alert("Message: " + result.message);
+                            }
+                        } else {
+                            alert("Error: Unable to add expense");
+                        }
+                    } catch (error) {
+                        console.error("Error submitting the form:", error);
+                        alert("Something went wrong.");
+                    }
+                });
+                document.getElementById("sendAlertButton").onclick = async function () {
+                    const button = this;
+                    const data_username = button.getAttribute("data_username");
+                    const data_email = button.getAttribute("data_email");
+                    const statusMessage = document.getElementById("statusMessage");
+
+                    statusMessage.textContent = "Please wait, Sending email...";
+                    statusMessage.style.color = "blue";
+
+                    try {
+                        const response = await fetch("{% url 'send_alert_email' %}", {
+                            method: "POST",
+
+                            body: JSON.stringify({ 'data_username': data_username, 'data_email': data_email }),
+                        });
+
+                        const result = await response.json();
+                        if (response.ok) {
+                            statusMessage.textContent = result.message;
+                            statusMessage.style.color = "green";
+                        } else {
+                            statusMessage.textContent = `Error: ${result.error}`;
+                            statusMessage.style.color = "red";
+                        }
+                    } catch (error) {
+                        statusMessage.textContent = "An unexpected error occurred.";
+                        statusMessage.style.color = "red";
+                    }
+                };
+            </script>
+        </div>
+
+
+        <div id="calculator" class="content-section">
+            <style>
+                /* Main Content Styling */
+                .main-content {
+                    width: 100%;
+                    max-width: 1200px;
+                    background: #ffffff;
+                    border-radius: 20px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                    padding: 40px;
+                }
+
+                /* Container Styling */
+                .container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 30px;
+                    justify-content: space-between;
+                    margin-bottom: 40px;
+                }
+
+                .left-section,
+                .right-section,
+                .calculator-box {
+                    background: #f9fbfc;
+                    padding: 20px;
+                    border-radius: 15px;
+                    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+                    flex: 1 1 45%;
+                    min-width: 300px;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                }
+
+                .left-section:hover,
+                .right-section:hover,
+                .calculator-box:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+                }
+
+
+                /* Form Styling */
+                .form-group {
+                    margin-bottom: 20px;
+                }
+
+                label {
+                    display: block;
+                    font-size: 1rem;
+                    font-weight: 500;
+                    color: #636e72;
+                    margin-bottom: 8px;
+                }
+
+                input {
+                    width: 100%;
+                    padding: 12px;
+                    font-size: 1rem;
+                    border: 2px solid #dfe6e9;
+                    border-radius: 10px;
+                    background-color: #f5f6fa;
+                    transition: all 0.3s ease;
+                }
+
+                input:focus {
+                    border-color: #74b9ff;
+                    box-shadow: 0 0 10px rgba(116, 185, 255, 0.5);
+                    outline: none;
+                }
+
+                input::placeholder {
+                    color: #b2bec3;
+                }
+
+                /* General Button Styling */
+                button {
+                    display: inline-block;
+                    padding: 12px 20px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: background 0.3s ease, transform 0.2s ease;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                }
+
+                /* Primary Button */
+                button.main-btn {
+                    background: #a2835e;
+                    color: #ffffff;
+                }
+
+                button.main-btn:hover {
+                    background: linear-gradient(135deg, #d1ad73, #a2835e);
+
+                    transform: translateY(-3px);
+                }
+
+                button.main-btn:active {
+                    transform: translateY(2px);
+                }
+
+                /* Secondary Button */
+                button.small-btn {
+                    background: linear-gradient(135deg, #636e72, #2d3436);
+                    color: #ffffff;
+                }
+
+                button.small-btn:hover {
+                    background: linear-gradient(135deg, #2d3436, #636e72);
+                    transform: translateY(-3px);
+                }
+
+                button.small-btn:active {
+                    transform: translateY(2px);
+                }
+
+                /* Adding consistent spacing */
+                .button-group {
+                    display: flex;
+                    gap: 15px;
+                    /* Consistent gap between buttons */
+                    flex-wrap: wrap;
+                }
+
+                /* Results Section */
+                #result,
+                #vat-result,
+                #gst-result {
+                    margin-top: 20px;
+                    padding: 20px;
+                    border-radius: 15px;
+                    text-align: center;
+                }
+
+                .result-value,
+                #gst-amount,
+                #total-price {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    color: #0984e3;
+                }
+
+                /* Responsive Design */
+                @media (max-width: 768px) {
+                    .container {
+                        flex-direction: column;
+                    }
+                }
+            </style>
+
+            <h1>Tax Calculator</h1>
+            <h4>Simplify Your Tax Planning</h4>
+
+            <div class="container">
+                <div class="left-section">
+                    <h4>Sales Tax Calculator</h4>
+                    <div class="form-group">
+                        <label for="price">Before Tax Price:</label>
+                        <input type="number" id="price" placeholder="Enter price" />
+                    </div>
+                    <div class="form-group">
+                        <label for="tax">Sales Tax %:</label>
+                        <input type="number" id="tax" placeholder="Enter tax rate" />
+                    </div>
+                    <div class="button-group">
+                        <button id="calculate-btn" class="main-btn">Calculate</button>
+                        <button id="clear-btn" class="small-btn">Reset</button>
+                    </div>
+                </div>
+
+                <div class="right-section">
+                    <h4>Results:</h4>
+                    <div id="result">
+                        <p>Before Tax Price: ₹ <span class="result-value">0.00</span></p>
+                        <p>Sales Tax: ₹ <span class="result-value">0.00</span></p>
+                        <p>After Tax Price: ₹ <span class="result-value">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
+                <div class="vat-calc calculator-box">
+                    <h4>VAT Calculator</h4>
+                    <div class="form-group">
+                        <label for="net-price">NET Price</label>
+                        <input type="text" id="net-price" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="vat-rate">VAT Rate (%)</label>
+                        <input type="text" id="vat-rate" placeholder="0.00">
+                    </div>
+                    <div class="button-group">
+                        <button id="calc-btn" class="main-btn">Calculate</button>
+                        <button id="reset-btn" class="small-btn">Reset</button>
+                    </div>
+                    <div id="vat-result">
+                        <p>Net Price:₹ <span class="result-value">0.00</span></p>
+                        <p>VAT Amount: ₹ <span class="result-value">0.00</span></p>
+                        <p>Gross Price: ₹ <span class="result-value">0.00</span></p>
+                    </div>
+                </div>
+
+                <div class="calculator-box gst-calc3">
+                    <h4>GST Calculator</h4>
+                    <div class="form-group">
+                        <label for="product-price">Product Price (₹):</label>
+                        <input type="number" id="product-price" placeholder="Enter Product Price">
+                    </div>
+                    <div class="form-group">
+                        <label for="gst-rate">GST Rate (%):</label>
+                        <input type="number" id="gst-rate" placeholder="Enter GST Rate">
+                    </div>
+                    <div class="button-group">
+                        <button id="calculate" class="main-btn">Calculate</button>
+                        <button id="clear" class="small-btn">Reset</button>
+                    </div>
+                    <div id="gst-result">
+                        <p>GST Amount: ₹ <span id="gst-amount">0.00</span></p>
+                        <p>Total Price: ₹ <span id="total-price">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+            <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                    // Sales Tax Calculator
+                    const priceInput = document.getElementById("price");
+                    const taxInput = document.getElementById("tax");
+                    const calculateBtn = document.getElementById("calculate-btn");
+                    const clearBtn = document.getElementById("clear-btn");
+                    const resultContainer = document.getElementById("result");
+
+                    calculateBtn.addEventListener("click", () => {
+                        const price = parseFloat(priceInput.value);
+                        const taxRate = parseFloat(taxInput.value);
+
+                        if (isNaN(price) || isNaN(taxRate)) {
+                            alert("Please enter valid numbers for price and tax rate.");
+                            return;
+                        }
+
+                        const salesTax = (price * taxRate) / 100;
+                        const afterTaxPrice = price + salesTax;
+
+                        resultContainer.innerHTML = `
+    <p>Before Tax Price: <span class="result-value">₹${price.toFixed(2)}</span></p>
+    <p>Sales Tax: <span class="result-value">₹${salesTax.toFixed(2)}</span></p>
+    <p>After Tax Price: <span class="result-value">₹${afterTaxPrice.toFixed(2)}</span></p>
+`;
+                    });
+
+                    clearBtn.addEventListener("click", () => {
+                        priceInput.value = "";
+                        taxInput.value = "";
+                        resultContainer.innerHTML = `
+    <p>Before Tax Price: <span class="result-value"></span></p>
+    <p>Sales Tax: <span class="result-value"></span></p>
+    <p>After Tax Price: <span class="result-value"></span></p>
+`;
+                    });
+
+                    // VAT Calculator
+                    const netPriceInput = document.getElementById("net-price");
+                    const vatRateInput = document.getElementById("vat-rate");
+                    const calcBtn = document.getElementById("calc-btn");
+                    const resetBtn = document.getElementById("reset-btn");
+                    const vatResultContainer = document.getElementById("vat-result");
+
+                    calcBtn.addEventListener("click", () => {
+                        const netPrice = parseFloat(netPriceInput.value);
+                        const vatRate = parseFloat(vatRateInput.value);
+
+                        if (isNaN(netPrice) || isNaN(vatRate)) {
+                            alert("Please enter valid numbers for net price and VAT rate.");
+                            return;
+                        }
+
+                        const vatAmount = (netPrice * vatRate) / 100;
+                        const grossPrice = netPrice + vatAmount;
+
+                        vatResultContainer.innerHTML = `
+    <p>Net Price: <span class="result-value">₹${netPrice.toFixed(2)}</span></p>
+    <p>VAT Amount: <span class="result-value">₹${vatAmount.toFixed(2)}</span></p>
+    <p>Gross Price: <span class="result-value">₹${grossPrice.toFixed(2)}</span></p>
+`;
+                    });
+
+                    resetBtn.addEventListener("click", () => {
+                        netPriceInput.value = "";
+                        vatRateInput.value = "";
+                        vatResultContainer.innerHTML = `
+    <p>Net Price: <span class="result-value"></span></p>
+    <p>VAT Amount: <span class="result-value"></span></p>
+    <p>Gross Price: <span class="result-value"></span></p>
+`;
+                    });
+
+                    // GST Calculator
+                    const productPriceInput = document.getElementById("product-price");
+                    const gstRateInput = document.getElementById("gst-rate");
+                    const gstCalculateBtn = document.getElementById("calculate");
+                    const gstClearBtn = document.getElementById("clear");
+                    const gstAmountDisplay = document.getElementById("gst-amount");
+                    const totalPriceDisplay = document.getElementById("total-price");
+
+                    gstCalculateBtn.addEventListener("click", () => {
+                        const productPrice = parseFloat(productPriceInput.value);
+                        const gstRate = parseFloat(gstRateInput.value);
+
+                        if (isNaN(productPrice) || isNaN(gstRate)) {
+                            alert("Please enter valid numbers for product price and GST rate.");
+                            return;
+                        }
+
+                        const gstAmount = (productPrice * gstRate) / 100;
+                        const totalPrice = productPrice + gstAmount;
+
+                        gstAmountDisplay.textContent = gstAmount.toFixed(2);
+                        totalPriceDisplay.textContent = totalPrice.toFixed(2);
+                    });
+
+                    gstClearBtn.addEventListener("click", () => {
+                        productPriceInput.value = "";
+                        gstRateInput.value = "";
+                        gstAmountDisplay.textContent = "0.00";
+                        totalPriceDisplay.textContent = "0.00";
+                    });
+                });
+
+            </script>
+        </div>
+
+
+        <div id="advisor" class="content-section">
+            <style>
+                body {
+                    font-family: 'Roboto', Arial, sans-serif;
+                    background-color: #fdf7eb;
+                    /* Soft cream background */
+                    margin: 0;
+                    padding: 0;
+                    color: #4b3f36;
+                    /* Soft brown */
+                }
+
+                .advice-container {
+                    max-width: 80%;
+                    margin: 20px auto;
+                    background-color: #fff;
+                    /* White card */
+                    padding: 15px;
+                    border-radius: 6px;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+                    border: 1px solid #f4e6d7;
+                    /* Cream border */
+                }
+
+                h1,
+                h4 {
+                    text-align: center;
+                    color: #6b4f3f;
+                    /* Darker brown for headers */
+                    margin-bottom: 15px;
+                }
+
+                .form-group {
+                    margin-bottom: 8px;
+                }
+
+                label {
+                    font-size: 12px;
+                    color: #4b3f36;
+                    /* Soft brown text */
+                    display: block;
+                    margin-bottom: 5px;
+                }
+
+                input,
+                select {
+                    width: 100%;
+                    padding: 6px;
+                    border: 1px solid #f4e6d7;
+                    /* Cream border */
+                    border-radius: 4px;
+                    font-size: 16px;
+                    color: #4b3f36;
+                    background-color: #fefaf3;
+                }
+
+                input:focus,
+                select:focus {
+                    outline: none;
+                    border-color: #d8c6af;
+                    /* Focused border */
+                }
+
+                select {
+                    appearance: none;
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
+                }
+
+                .advisor-btn {
+                    width: 100%;
+                    padding: 8px;
+                    background-color: #f4e6d7;
+                    /* Soft cream background */
+                    color: #4b3f36;
+                    /* Darker brown text */
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 18px;
+                    cursor: pointer;
+                    margin-top: 10px;
+                    transition: background-color 0.3s ease;
+                }
+
+                .advisor-btn:hover {
+                    background-color: #d8c6af;
+                    /* Slightly darker cream on hover */
+                }
+
+                .result {
+                    margin-top: 20px;
+                    padding: 10px;
+                    background-color: #fef9f3;
+                    /* Light cream */
+                    border-radius: 5px;
+                    font-size: 16px;
+                    /* Increased font size */
+                    text-align: center;
+                    font-weight: bold;
+                    color: #4b3f36;
+                    border: 1px solid #f4e6d7;
+                }
+
+                .result span {
+                    color: #f4a460;
+                    /* Highlight color for the recommendation */
+                }
+
+                .advice {
+                    margin-top: 8px;
+                    font-size: 16px;
+                    color: #4b3f36;
+                    font-weight: normal;
+                    text-align: center;
+                }
+
+                .form-group-row {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 20px;
+                    /* Space between the form groups */
+                }
+
+                .form-group-row .form-group {
+                    flex: 1;
+                    /* Make both form groups take up equal width */
+                }
+
+                .form-group-row .form-group label {
+                    font-size: 12px;
+                    color: #4b3f36;
+                    display: block;
+                    margin-bottom: 5px;
+                }
+
+                @media (max-width: 768px) {
+                    .advice-container {
+                        padding: 12px;
+                    }
+
+                    label {
+                        font-size: 10px;
+                    }
+
+                    .btn {
+                        font-size: 11px;
+                        padding: 6px;
+                    }
+
+                    input,
+                    select {
+                        font-size: 11px;
+                        padding: 5px;
+                    }
+                }
+
+                /* Style for the circular progress bar */
+                .progress-container {
+                    width: 50px;
+                    height: 50px;
+                    position: relative;
+                    margin: 0 auto;
+                    margin-top: 20px;
+                }
+
+                .circle {
+                    stroke: #f4e6d7;
+                    stroke-width: 6;
+                    fill: none;
+                    transition: stroke-dasharray 0.3s ease;
+                }
+
+                .circle-background {
+                    stroke: #ddd;
+                }
+
+                .circle-progress {
+                    stroke: #f4a460;
+                }
+
+                .loading-text {
+                    font-size: 16px;
+                    color: #6b4f3f;
+                    text-align: center;
+                    margin-top: 10px;
+                }
+            </style>
+
+            <h1>Investment Advisor</h1>
+            <h4>Personalized Financial Guidance for Smarter Investments</h4>
+            <div class="advice-container">
+                <form id="investment-form">
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="total_savings">Total Savings (₹)</label>
+                            <input value="{{ total_amount }}" type="number" id="total_savings" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="income">Income (₹)</label>
+                            <input type="number" id="income" required>
+                        </div>
+                    </div>
+
+                    <!-- Time Horizon and Age in one row -->
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="time_horizon">Time Horizon (years)</label>
+                            <input type="number" min="1" max="100" id="time_horizon" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="age">Age</label>
+                            <input type="number" min="6" max="100" id="age" required>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="risk_tolerance">Risk Tolerance</label>
+                        <select id="risk_tolerance" required>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="advisor-btn">Recommend</button>
+                </form>
+                <div id="recommendation-result" class="result" style="display:none;">
+                    Recommended Investment: <span id="investment-type"></span>
+                    <div class="confidence" id="confidence" style="margin-top: 5px;"></div>
+                </div>
+                <div class="advice" id="investment-advice" style="display:none;"></div>
+            </div>
+
+
+            <script>
+                document.getElementById('investment-form').addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    // Hide the result initially to simulate processing
+                    document.getElementById('recommendation-result').style.display = 'none';
+                    document.getElementById('investment-advice').style.display = 'none';
+
+                    // Create and show loading progress bar
+                    const loadingContainer = document.createElement('div');
+                    loadingContainer.style.textAlign = 'center';
+                    document.querySelector('.advice-container').appendChild(loadingContainer);
+
+                    // Create circular progress bar
+                    const progressContainer = document.createElement('div');
+                    progressContainer.classList.add('progress-container');
+                    loadingContainer.appendChild(progressContainer);
+
+                    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    svg.setAttribute("width", "50");
+                    svg.setAttribute("height", "50");
+                    svg.setAttribute("viewBox", "0 0 50 50");
+                    progressContainer.appendChild(svg);
+
+                    const circleBackground = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circleBackground.setAttribute("cx", "25");
+                    circleBackground.setAttribute("cy", "25");
+                    circleBackground.setAttribute("r", "20");
+                    circleBackground.classList.add("circle", "circle-background");
+                    svg.appendChild(circleBackground);
+
+                    const circleProgress = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circleProgress.setAttribute("cx", "25");
+                    circleProgress.setAttribute("cy", "25");
+                    circleProgress.setAttribute("r", "20");
+                    circleProgress.classList.add("circle", "circle-progress");
+                    svg.appendChild(circleProgress);
+
+                    const loadingText = document.createElement('div');
+                    loadingText.classList.add('loading-text');
+                    loadingText.textContent = "Please wait...";
+                    loadingContainer.appendChild(loadingText);
+
+                    // Variables for updating progress
+                    let progress = 0;
+                    const circumference = 2 * Math.PI * 20;
+                    circleProgress.style.strokeDasharray = circumference;
+                    circleProgress.style.strokeDashoffset = circumference;
+
+                    // Update the progress every 200ms
+                    const progressInterval = setInterval(function () {
+                        progress += 2;
+                        const offset = circumference - (circumference * progress) / 100;
+                        circleProgress.style.strokeDashoffset = offset;
+                        if (progress >= 100) {
+                            clearInterval(progressInterval);
+                            progressContainer.style.display = 'none';
+                            loadingText.textContent = "\nGenerating recommendation...";
+                        } else if (progress < 100 && progress >= 80) {
+                            loadingText.textContent = `Almost there... ${progress}%`;
+                        } else if (progress < 80 && progress >= 50) {
+                            loadingText.textContent = `Predicting trends... ${progress}%`;
+                        } else if (progress < 50 && progress >= 20) {
+                            loadingText.textContent = `Building model... ${progress}%`;
+                        } else if (progress <= 20) {
+                            loadingText.textContent = `Initializing model... ${progress}%`;
+                        }
+                    }, 100);
+
+
+                    setTimeout(function () {
+                        const totalSavings = parseFloat(document.getElementById('total_savings').value);
+                        const riskTolerance = document.getElementById('risk_tolerance').value;
+                        const timeHorizon = parseInt(document.getElementById('time_horizon').value);
+                        const age = parseInt(document.getElementById('age').value);
+                        const income = parseInt(document.getElementById('income').value);
+                        const recommendation = getInvestmentRecommendation(totalSavings, riskTolerance, timeHorizon, age, income);
+
+                        document.getElementById('investment-type').textContent = recommendation.recommendation;
+                        document.getElementById('confidence').textContent = `Confidence: ${recommendation.confidence.toFixed(2)}%`;
+                        document.getElementById('investment-advice').textContent = recommendation.advice;
+
+                        // Hide the loading message and display the result
+                        loadingContainer.style.display = 'none';
+                        document.getElementById('recommendation-result').style.display = 'block';
+                        document.getElementById('investment-advice').style.display = 'block';
+                    }, 8000);
+                });
+
+                function getInvestmentRecommendation(totalSavings, riskTolerance, timeHorizon, age, income) {
+                    let recommendation = '', confidence = 0, advice = '';
+                    if (riskTolerance === 'high' && timeHorizon > 5 && income > 80000) {
+                        recommendation = 'Stocks'; confidence = 85;
+                        advice = 'Stocks offer high returns but come with risks. Consider ETFs or blue-chip stocks.';
+                    } else if (riskTolerance === 'medium' && totalSavings < 100000) {
+                        recommendation = 'Fixed Deposits'; confidence = 75;
+                        advice = 'Fixed Deposits provide stable returns with low risk. They are a safe option for you.';
+                    } else {
+                        recommendation = 'Mutual Funds'; confidence = 80;
+                        advice = 'Mutual funds offer diversification and are suitable for moderate risk appetites.';
+                    }
+                    return { recommendation, confidence, advice };
+                }
+
+
+            </script>
+
+        </div>
+
+
+        <div id="logout" class="content-section">
+            <style>
+                .logout-p {
+                    font-size: 18px;
+                    color: #777;
+                    margin-bottom: 30px;
+                }
+
+                .logout-btn {
+                    padding: 15px 30px;
+                    background: linear-gradient(45deg, #ff6347, #ff4500);
+                    color: #fff;
+                    border: none;
+                    border-radius: 50px;
+                    font-size: 18px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                }
+
+                .logout-h1 {
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #5a4635;
+                    margin-bottom: 20px;
+                }
+
+
+                .logout-p {
+                    font-size: 16px;
+                    color: #777;
+                    margin-bottom: 30px;
+                }
+
+                .logout-btn:hover {
+                    background: linear-gradient(45deg, #ff4500, #ff6347);
+                    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+                    transform: scale(1.05);
+                }
+
+                .logout-btn:active {
+                    background: linear-gradient(45deg, #e53d34, #e3442e);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                    transform: scale(1);
+                }
+
+                .logout-container {
+                    background-color: #ffffff;
+                    padding: 50px;
+                    border-radius: 15px;
+                    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+                    text-align: center;
+                    max-width: 400px;
+                    width: 100%;
+                }
+            </style>
+            <h1>Logout</h1>
+            <div class="logout-container">
+                <h1 class="logout-h1">Are you sure you want to log out?</h1>
+                <p class="logout-p">Once you log out, you will need to log in again to access your account.</p>
+                <form method="POST" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Log Out</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Section -->
+    <div class="profile">
+        <style>
+            .profile {
+                background-color: rgb(255, 255, 255);
+                width: 275px;
+                border-radius: 16px;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                transition: all 0.3s ease;
+                padding: 20px;
+                text-align: center;
+                font-family: 'Arial', sans-serif;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                height: 100%;
+            }
+
+            .profile:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            }
+
+            .profile-header {
+                margin-bottom: 15px;
+                position: relative;
+            }
+
+            .avatar {
+                background-color:rgb(31, 116, 186);
+                color: white;
+                font-size: 2.5rem;
+                font-weight: bold;
+                width: 55px;
+                height: 55px;
+                border-radius: 50%;
+                margin: 0 auto 10px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            h3 {
+                font-size: 1.2rem;
+                color: #333;
+                margin-bottom: 5px;
+            }
+
+            p {
+                font-size: 0.8rem;
+               color:rgb(1, 1, 1)
+                margin-bottom: 5px;
+            }
+
+            /* Modern Bank Card Styling */
+
+
+            .card-header i {
+                font-size: 1.4rem;
+                color:rgb(1, 1, 1);
+            }
+
+            /* Responsive Design for Smaller Screens */
+            @media (max-width: 768px) {
+                .profile {
+                    width: 90%;
+                    padding: 15px;
+                }
+
+                .avatar {
+                    width: 50px;
+                    height: 50px;
+                    font-size: 2rem;
+                }
+
+                h3 {
+                    font-size: 1rem;
+                }
+
+                .bank-card {
+                    flex: 1 1 100%;
+                }
+            }
+
+            .social-links a {
+                color:rgb(0, 0, 0);
+                font-size: 1.5rem;
+                margin: 0 10px;
+                transition: color 0.3s ease;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .social-links a:hover {
+                color: #634827;
+            }
+
+            .social-links i {
+                margin-right: 8px;
+            }
+
+            .custom-divider {
+                border: none;
+                height: 1px;
+                background-color: #a2835e;
+                width: 100%;
+                opacity: 0.8;
+            }
+
+
+            /* Adjusted styles for list view */
+            .bank-summary {
+                display: flex;
+                flex-direction: column;
+                gap: 3px;
+                width: 100%;
+            }
+
+            .bank-list-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 6px 12px;
+                background: none;
+                border-bottom: 1px solid #ddd;
+                font-size: 0.85rem;
+                color: #333;
+            }
+
+            .bank-list-item:last-child {
+                border-bottom: none;
+            }
+
+            .bank-list-item i {
+                color: #a2835e;
+                font-size: 1rem;
+                margin-right: 8px;
+            }
+        </style>
+
+        <div class="profile-header">
+            <div class="avatar" id="avatar">{{ avatar_name }}</div>
+            <h3>{{ display_name }}</h3>
+            <p>UID: {{ uid|slice:":5" }}</p>
+            <p>Email: {{ email }}</p>
+        </div>
+
+
+        <!-- Modern Total Savings & Balance Section as List -->
+        <ul class="bank-summary">
+            {% if total_amount != 0 %}
+            <li class="bank-list-item">
+                <span><i class="material-icons">account_balance_wallet</i> Total Savings</span>
+                <span>₹ {{ total_amount }}/-</span>
+            </li>
+            {% endif %}
+
+            {% if total_expenses != 0 %}
+            <li class="bank-list-item">
+                <span><i class="material-icons">money_off</i> Total Expenses</span>
+                <span>₹ {{ total_expenses }}/-</span>
+            </li>
+            {% endif %}
+
+            {% if total_amount_after_expense != total_amount %}
+            <li class="bank-list-item">
+                <span><i class="material-icons">account_balance</i> Current Savings</span>
+                <span>₹ {{ total_amount_after_expense }}/-</span>
+            </li>
+            {% endif %}
+        </ul>
+
+        {% if total_amount != 0 %}
+        <hr class="custom-divider">
+        {% endif %}
+
+        <!-- App Description -->
+        <div class="app-description">
+            <h4>Your Personal Advisor</h4>
+            <p style="text-align: justify">Welcome to the Personal Advisor Web App! This platform uses a simple
+                predictive model to assist you in managing your finances. The user-friendly interface makes it easy to
+                stay on top of your financial goals, offering practical advice based on your current financial
+                situation.</p>
+        </div>
+
+        <!-- Social Links -->
+        <div class="social-links">
+            <a href="https://linkedin.com" target="_blank">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://github.com" target="_blank">
+                <i class="fab fa-github"></i>
+            </a>
+        </div>
+    </div>
+
+<!-- Chat Widget HTML -->
+
+<style>
+  /* Chat trigger button (circle bubble) */
+  #chat-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #a2835e;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    z-index: 1000;
+  }
+
+  #chat-button:hover {
+    background-color: #634827;
+  }
+
+  /* Chat window */
+  #chat-window {
+    position: fixed;
+    bottom: 80px; /* Above button */
+    right: 20px;
+    width: 300px;
+    max-height: 400px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 999;
+    display: none; /* only one display here */
+  }
+
+  #chat-messages {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    f ont-family: Arial, sans-serif;
+    font-size: 14px;
+  }
+
+  #chat-messages .message {
+    margin-bottom: 10px;
+  }
+
+  #chat-input {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    background-color: #fafafa;
+  }
+
+  #message-input {
+    flex-grow: 1;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+
+  #chat-input button {
+    background-color:rgb(211, 206, 200);
+    color: white;
+    border: none;
+    padding: 8px;
+    margin-left: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  #chat-input button:hover {
+    background-color:rgb(198, 198, 198);
+  }
+  
+</style>
+
+  <style>
+    /* Chat trigger button (circle with robot icon) */
+    #chat-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background-color:rgb(255, 255, 255);
+      border: none;
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+    }
+
+    #chat-button:hover {
+      background-color:rgb(161, 161, 161);
+    }
+
+    #chat-icon {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    /* Chat window */
+    #chat-window {
+      position: fixed;
+      bottom: 90px; /* slightly above the button */
+      right: 20px;
+      width: 300px;
+      max-height: 400px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 999;
+      display: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chat-messages {
+      flex-grow: 1;
+      padding: 10px;
+      overflow-y: auto;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    #chat-messages .message {
+      margin-bottom: 10px;
+    }
+
+    #chat-input {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+      background-color:rgb(255, 255, 255);
+    }
+
+    #message-input {
+      flex-grow: 1;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    #chat-input button {
+      background-color:rgb(217, 217, 217);
+      color: white;
+      border: none;
+      padding: 8px;
+      margin-left: 5px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    #chat-input button:hover {
+      background-color:rgb(114, 110, 106);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Chat trigger button with robot icon -->
+<button id="chat-button">
+  <img src="https://img.icons8.com/fluency/48/chatbot.png" alt="Chatbot" id="chat-icon" />
+</button>
+
+<!-- Chat window -->
+<div id="chat-window">
+  <div id="chat-messages"></div>
+  <div id="chat-input">
+    <input type="text" id="message-input" placeholder="Type a message..." />
+    <button onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<script>
+  const chatButton = document.getElementById("chat-button");
+  const chatWindow = document.getElementById("chat-window");
+  const messagesDiv = document.getElementById("chat-messages");
+  const messageInput = document.getElementById("message-input");
+
+  // Toggle chat window
+  chatButton.onclick = () => {
+    chatWindow.style.display = chatWindow.style.display === "none" ? "flex" : "none";
+  };
+
+  // ⚠️ For testing only: never expose this key in production
+  const API_KEY = "sk-proj-REPLACE_WITH_YOUR_KEY";
+
+  async function sendMessage() {
+    const userMessage = messageInput.value.trim();
+    if (!userMessage) return;
+
+    appendMessage("user", userMessage);
+    messageInput.value = "";
+
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: userMessage }]
+        })
+      });
+
+      const data = await response.json();
+      const reply = data.choices?.[0]?.message?.content || "No reply.";
+      appendMessage("bot", reply);
+    } catch (err) {
+      appendMessage("bot", "⚠️ Error reaching API.");
+      console.error(err);
+    }
+  }
+
+  function appendMessage(role, text) {
+    const msg = document.createElement("div");
+    msg.className = `message ${role}`;
+    msg.innerHTML = `<strong>${role === "user" ? "You" : "Bot"}:</strong> ${text}`;
+    messagesDiv.appendChild(msg);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  // Send message on Enter key
+  messageInput.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") sendMessage();
+  });
+</script>
+
+
+
+    <script type="module" src="{% static 'js/dashboard.js' %}">
+    </script>
+</body>
+
+</html>

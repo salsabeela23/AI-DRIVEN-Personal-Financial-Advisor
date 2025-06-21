@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Overspending Alert!</title>
+</head>
+<body>
+    <p>Hi {{ user_name }},</p>
+
+    <p>This email is to alert you to potential overspending based on your recent activity within our 
+       {{ app_name }} web app.</p>
+
+    {% if reason %}
+        <p>{{ reason }}</p>
+    {% endif %}
+
+    {% if budget_exceeded_category %}
+        <p>Recent spending has exceeded your average monthly budget for {{ budget_exceeded_category }}.</p>
+    {% endif %}
+
+    {% if recent_transactions %}
+        <p>You've made {{ recent_transactions|length }} transactions exceeding [Amount] in the past [Timeframe].</p> 
+    {% endif %}
+
+    {% if budget_exceed_amount %}
+        <p>Your current spending trajectory suggests you may exceed your monthly budget by {{ budget_exceed_amount }}.</p>
+    {% endif %}
+
+    <p>You can review your spending patterns and adjust your budget accordingly by logging into your account here: 
+       <a href="{{ account_url }}">Go to website</a></p>
+
+    <p>We encourage you to review your spending habits and make any necessary adjustments to stay on track with your financial goals.</p>
+
+    <h3>Helpful Resources:</h3>
+    <ul>
+        <li><a href="{{ budgeting_tips_url }}">Budgeting Tips & Tools</a></li>
+        <li><a href="{{ spending_categories_url }}">Spending Categories Review</a></li>
+    </ul>
+
+    <p>If you have any questions or need assistance, please don't hesitate to contact us:</p>
+    <ul>
+        <li>Phone: {{ support_phone }}</li>
+        <li>Email: {{ support_email }}</li>
+    </ul>
+
+    <p>Sincerely,</p>
+    <p>The {{ app_name }} Team</p>
+</body>
+</html>

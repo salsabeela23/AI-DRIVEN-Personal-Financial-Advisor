@@ -1,0 +1,53 @@
+<!-- logged_out.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logged Out</title>
+    <style>
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #5a4635;
+        }
+
+        p {
+            font-size: 18px;
+            color: #555;
+        }
+
+        .redirect-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #b2946e;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .redirect-btn:hover {
+            background-color: #a2835e;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>You have been logged out</h1>
+        <p>Thank you for using Personal Financial Advisor. You can now log back in or return to the homepage.</p>
+        <button class="redirect-btn" onclick="window.location.href='{% url 'signin' %}'">Log In Again</button>
+    </div>
+
+</body>
+
+</html>

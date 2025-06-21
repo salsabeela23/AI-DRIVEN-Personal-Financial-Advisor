@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <style>
+        /* General body styling */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f3e2c7, #f9f7f2);
+            /* Creamy light gradient background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+            overflow: hidden;
+        }
+
+        /* Container for the welcome card */
+        .container {
+            background: #fff;
+            padding: 40px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            transform: translateY(-10px);
+            transition: transform 0.3s ease;
+        }
+
+        /* Title Styling */
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #6a4e23;
+            /* Darker brown for contrast */
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Description Styling */
+        p {
+            font-size: 1.1rem;
+            color: #7f5c3e;
+            /* Soft brown color for the text */
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        /* Button group layout */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* Button Styling */
+        button {
+            padding: 18px 38px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+            width: 200px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .signup {
+            background: #e3b38f;
+            /* Creamy beige for the signup button */
+            color: white;
+            box-shadow: 0 5px 15px rgba(227, 179, 143, 0.3);
+        }
+
+        .signup:hover {
+            background: #d1a16a;
+            /* Slightly darker for hover */
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(227, 179, 143, 0.3);
+        }
+
+        .signin {
+            background: #c4a67b;
+            /* Warm light brown for the signin button */
+            color: white;
+            box-shadow: 0 5px 15px rgba(196, 166, 123, 0.3);
+        }
+
+        .signin:hover {
+            background: #9f7e4b;
+            /* Darker brown for hover */
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(196, 166, 123, 0.3);
+        }
+
+        /* Hover effect on container */
+        .container:hover {
+            transform: translateY(-20px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Welcome!</h1>
+        <p>
+            Thank you for using the Personal Financial Advisor App. Please log in if you already have an account, or
+            sign up to create a new account and start exploring.
+        </p>
+        <div class="button-group">
+            <button id="getStartedButton" class="signin">Get Started</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('getStartedButton').addEventListener('click', function () {
+            // A simple GET request to check the user's authentication state
+            window.location.href = "{% url 'signin' %}";  // Trigger server-side logic
+        });
+    </script>
+
+</body>
+
+</html>
